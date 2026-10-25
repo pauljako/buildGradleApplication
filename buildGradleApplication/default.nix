@@ -21,13 +21,14 @@
   verificationFile ? "gradle/verification-metadata.xml",
   buildTask ? ":installDist",
   installPhase,
+  postFixup ? "",
 }: let
   m2Repository = mkM2Repository {
     inherit pname version src dependencyFilter repositories verificationFile;
   };
 
   package = stdenvNoCC.mkDerivation {
-    inherit pname version src buildInputs env installPhase meta;
+    inherit pname version src buildInputs env installPhase meta postFixup;
 
     passthru = {
       inherit jdk gradle;
@@ -55,11 +56,6 @@
     '';
 
     dontWrapGApps = true;
-    postFixup = ''
-      wrapProgram $out/bin/${pname} \
-        --set-default JAVA_HOME "${jdk.home}" \
-        ''${gappsWrapperArgs[@]}
-    '';
   };
 in
   package
